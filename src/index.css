@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* Government Emergency Management Design Tokens & Reset */
+:root {
+  --gov-bg: #F6F7F9;
+  --gov-card: #FFFFFF;
+  --gov-panel: #F1F3F5;
+  --gov-border: #DDE2E7;
+  --gov-text-primary: #172033;
+  --gov-text-secondary: #5F6877;
+  --gov-accent: #1D4E89;
+  --gov-accent-hover: #153966;
+  
+  /* Strict Severity Colors */
+  --risk-low: #15803D;
+  --risk-low-bg: #DCFCE7;
+  --risk-mod: #B45309;
+  --risk-mod-bg: #FEF3C7;
+  --risk-high: #C2410C;
+  --risk-high-bg: #FFEDD5;
+  --risk-crit: #B91C1C;
+  --risk-crit-bg: #FEE2E2;
+}
+
+body {
+  background-color: var(--gov-bg);
+  color: var(--gov-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Leaflet Container and Popup Styling for Government Theme */
+.leaflet-container {
+  font-family: inherit;
+  width: 100%;
+  height: 100%;
+  background: #E8ECEF;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.15);
+  border: 1px solid #DDE2E7;
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.leaflet-popup-tip {
+  background: #FFFFFF;
+}
+
+/* Custom Marker Styling */
+.gov-marker-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-weight: 700;
+  font-size: 11px;
+  color: #FFFFFF;
+  transition: transform 0.15s ease-in-out;
+}
+
+.gov-marker-pin:hover {
+  transform: scale(1.15);
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NER Landslide Intelligence Platform",
+  "description": "AI-Powered Landslide Early Warning, Monitoring & Emergency Response System for North Eastern India",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
