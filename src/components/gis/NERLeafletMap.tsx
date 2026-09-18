@@ -372,8 +372,13 @@ export const NERLeafletMap: React.FC<Props> = ({
     if (layerToggles.currentRisk || layerToggles.riskHeatmap) {
       effectiveLocations.forEach((loc) => {
         const isSelected = loc.id === selectedLocationId;
+        const riskAvailable = loc.riskDataAvailable !== false;
+        const environmentAvailable = loc.environmentalDataAvailable !== false;
+        const terrainAvailable = loc.terrainDataAvailable !== false;
         const color =
-          loc.riskLevel === 'CRITICAL'
+          !riskAvailable
+            ? '#64748B'
+            : loc.riskLevel === 'CRITICAL'
             ? '#DC2626'
             : loc.riskLevel === 'HIGH'
             ? '#EA580C'
@@ -394,7 +399,7 @@ export const NERLeafletMap: React.FC<Props> = ({
             : 17;
 
         // Susceptibility Runout Buffer
-        if (layerToggles.riskHeatmap && (loc.riskLevel === 'CRITICAL' || loc.riskLevel === 'HIGH')) {
+        if (layerToggles.riskHeatmap && riskAvailable && (loc.riskLevel === 'CRITICAL' || loc.riskLevel === 'HIGH')) {
           const bufferRadius = loc.riskLevel === 'CRITICAL' ? 3200 : 2000;
           const circle = L.circle([loc.lat, loc.lng], {
             radius: bufferRadius,
@@ -426,7 +431,7 @@ export const NERLeafletMap: React.FC<Props> = ({
               cursor: pointer;
               ${loc.riskLevel === 'CRITICAL' ? 'box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.35);' : ''}
             ">
-              ${loc.riskScore}
+              ${riskAvailable ? loc.riskScore : '--'}
             </div>
           `;
 
@@ -446,7 +451,7 @@ export const NERLeafletMap: React.FC<Props> = ({
             <div style="font-family: system-ui, sans-serif; min-width: 240px; font-size: 12px; color: #172033; padding: 6px;">
               <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #DDE2E7; padding-bottom: 3px; margin-bottom: 5px;">
                 <span style="font-size: 9px; font-weight: 700; background: ${color}20; color: ${color}; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
-                  ${loc.riskLevel} (${loc.riskScore}%)
+                  ${riskAvailable ? `${loc.riskLevel} (${loc.riskScore}%)` : 'RISK UNAVAILABLE'}
                 </span>
                 <span style="font-size: 9px; color: #5F6877; font-family: monospace;">
                   ${activeHorizon === 'NOW' ? 'CURRENT AI RISK' : `AI FORECAST (${activeHorizon})`}
@@ -457,13 +462,13 @@ export const NERLeafletMap: React.FC<Props> = ({
               </div>
               <h4 style="font-size: 12px; font-weight: 700; margin: 0 0 3px 0; color: #1D4E89;">${loc.name}</h4>
               <p style="margin: 0 0 5px 0; color: #5F6877; font-size: 11px;">
-                ${loc.district}, ${loc.state} • Elev: ${loc.elevationM}m • Slope: ${loc.slopeAngleDeg}°
+                ${loc.district}, ${loc.state} • Elev: ${terrainAvailable ? `${loc.elevationM}m` : 'Unavailable'} • Slope: ${terrainAvailable ? `${loc.slopeAngleDeg}°` : 'Unavailable'}
               </p>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: #F8F9FA; padding: 5px; border-radius: 4px; margin-bottom: 6px; font-size: 10px;">
-                <div>Rain 24h: <strong>${loc.rainfall24hMm} mm</strong></div>
-                <div>Soil Sat: <strong>${loc.soilMoisturePct}%</strong></div>
-                <div>Memory: <strong>${loc.rainfallDecayMemoryMm} mm</strong></div>
+                <div>Rain 24h: <strong>${environmentAvailable ? `${loc.rainfall24hMm} mm` : 'Unavailable'}</strong></div>
+                <div>Soil Sat: <strong>${environmentAvailable ? `${loc.soilMoisturePct}%` : 'Unavailable'}</strong></div>
+                <div>Memory: <strong>${environmentAvailable ? `${loc.rainfallDecayMemoryMm} mm` : 'Unavailable'}</strong></div>
                 <div>Trend: <strong>${loc.riskTrend}</strong></div>
               </div>
 
