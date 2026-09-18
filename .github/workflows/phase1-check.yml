@@ -1,0 +1,23 @@
+name: Phase 1 frontend checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - phase1-functional-fixes
+  workflow_dispatch:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

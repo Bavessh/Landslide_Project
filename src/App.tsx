@@ -28,6 +28,11 @@ import { ShelterIntelligencePage } from './components/authority/ShelterIntellige
 import { WhatIfSimulationPage } from './components/authority/WhatIfSimulationPage';
 import { FieldEvidencePage } from './components/authority/FieldEvidencePage';
 import { ResponsePrioritiesPage } from './components/authority/ResponsePrioritiesPage';
+import { GISRiskMapPage } from './components/authority/GISRiskMapPage';
+import { MonitoredSlopesPage } from './components/authority/MonitoredSlopesPage';
+import { AlertsBulletinsPage } from './components/authority/AlertsBulletinsPage';
+import { ModelIntelligencePage } from './components/authority/ModelIntelligencePage';
+import { SystemActivityPage } from './components/authority/SystemActivityPage';
 import { CitizenPortal } from './components/citizen/CitizenPortal';
 import { RescueOperations } from './components/rescue/RescueOperations';
 import { LoadingState } from './components/common/LoadingState';
@@ -174,7 +179,8 @@ export default function App() {
           if (dist) setSelectedDistrict(dist);
         }}
         onGenerateWarning={() => {
-          alert('CAP Emergency Warning Bulletin initiated for active sector.');
+          setCurrentRole('AUTHORITY');
+          setCurrentTab('alerts');
         }}
       />
 
@@ -244,6 +250,31 @@ export default function App() {
                       fieldReports={fieldReports}
                       selectedLocation={selectedLocation}
                       onSelectLocation={handleSelectLocation}
+                      onNavigateTab={(tab) => setCurrentTab(tab)}
+                    />
+                  )}
+
+
+                  {currentTab === 'risk_map' && (
+                    <GISRiskMapPage
+                      selectedState={selectedState}
+                      selectedDistrict={selectedDistrict}
+                      locations={locations}
+                      roads={roads}
+                      shelters={shelters}
+                      fieldReports={fieldReports}
+                      selectedLocation={selectedLocation}
+                      onSelectLocation={handleSelectLocation}
+                      onNavigateTab={(tab) => setCurrentTab(tab)}
+                    />
+                  )}
+
+                  {currentTab === 'locations' && (
+                    <MonitoredSlopesPage
+                      selectedState={selectedState}
+                      selectedDistrict={selectedDistrict}
+                      locations={locations}
+                      onSelectLocation={(location) => handleSelectLocation(location)}
                       onNavigateTab={(tab) => setCurrentTab(tab)}
                     />
                   )}
@@ -355,6 +386,39 @@ export default function App() {
                     />
                   )}
 
+
+                  {currentTab === 'alerts' && (
+                    <AlertsBulletinsPage
+                      selectedState={selectedState}
+                      selectedDistrict={selectedDistrict}
+                      bulletins={bulletins}
+                      selectedLocation={selectedLocation}
+                      backendConnected={backendConnected}
+                      onRefresh={loadData}
+                    />
+                  )}
+
+                  {currentTab === 'model_intelligence' && (
+                    <ModelIntelligencePage
+                      selectedState={selectedState}
+                      selectedDistrict={selectedDistrict}
+                      locations={locations}
+                      selectedLocation={selectedLocation}
+                      backendConnected={backendConnected}
+                    />
+                  )}
+
+                  {currentTab === 'system_activity' && (
+                    <SystemActivityPage
+                      selectedState={selectedState}
+                      selectedDistrict={selectedDistrict}
+                      locations={locations}
+                      fieldReports={fieldReports}
+                      bulletins={bulletins}
+                      backendConnected={backendConnected}
+                    />
+                  )}
+
                   {currentTab === 'response_priorities' && (
                     <ResponsePrioritiesPage
                       selectedState={selectedState}
@@ -369,19 +433,25 @@ export default function App() {
                     />
                   )}
 
-                  {/* Fallback for other authority tabs */}
-                  {!['overview', 'risk_intelligence', 'weather', 'impact', 'roads', 'shelters', 'what_if', 'field_reports', 'response_priorities'].includes(currentTab) && (
-                    <AuthorityOverview
-                      selectedState={selectedState}
-                      selectedDistrict={selectedDistrict}
-                      locations={locations}
-                      roads={roads}
-                      shelters={shelters}
-                      fieldReports={fieldReports}
-                      selectedLocation={selectedLocation}
-                      onSelectLocation={handleSelectLocation}
-                      onNavigateTab={(tab) => setCurrentTab(tab)}
-                    />
+                  {![
+                    'overview',
+                    'risk_intelligence',
+                    'risk_map',
+                    'locations',
+                    'weather',
+                    'impact',
+                    'roads',
+                    'shelters',
+                    'what_if',
+                    'field_reports',
+                    'alerts',
+                    'response_priorities',
+                    'model_intelligence',
+                    'system_activity'
+                  ].includes(currentTab) && (
+                    <div className="p-8 text-center text-sm text-[#5F6877]">
+                      This Authority workspace is unavailable.
+                    </div>
                   )}
                 </>
               )}

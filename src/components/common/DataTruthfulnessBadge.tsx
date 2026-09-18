@@ -28,16 +28,16 @@ export const DataTruthfulnessBadge: React.FC<Props> = ({ provenance, size = 'sm'
       case 'LIVE WEATHER':
         return {
           icon: CloudRain,
-          label: 'LIVE WEATHER (IMD)',
+          label: 'LIVE WEATHER',
           bg: 'bg-blue-50 text-blue-800 border-blue-300',
-          desc: 'Meteorological telemetry feed'
+          desc: 'Current meteorological feed when the configured weather API is reachable'
         };
       case 'AI PREDICTION':
         return {
           icon: Cpu,
-          label: 'AI ESTIMATE (XGBoost/SHAP)',
+          label: 'AI ESTIMATE (MODEL)',
           bg: 'bg-indigo-50 text-indigo-900 border-indigo-300',
-          desc: 'Model inference — not a guaranteed prediction'
+          desc: 'Project model inference — not a guaranteed prediction'
         };
       case 'HISTORICAL DATA':
         return {

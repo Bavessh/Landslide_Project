@@ -19,6 +19,7 @@ import {
   NERState
 } from '../types';
 import { apiClient, ApiError } from './apiClient';
+import { normalizeRiskLevel } from '../utils/dataNormalization';
 
 /**
  * Frontend risk intelligence service.
@@ -49,7 +50,7 @@ class RiskService {
         if (response.risk) {
           const backendScore = response.risk.risk_score ?? ((response.risk.risk_probability || 0) * 100);
           baseScore = Math.round(backendScore * 10) / 10;
-          baseLevel = response.risk.risk_level === 'MEDIUM' ? 'MODERATE' : (response.risk.risk_level as RiskLevel) || baseLevel;
+          baseLevel = normalizeRiskLevel(response.risk.risk_level, baseLevel);
           provenance = 'PROJECT API';
           backendRisk = {
             probabilityPct: Math.round((response.risk.risk_probability ?? backendScore / 100) * 1000) / 10,
@@ -86,7 +87,7 @@ class RiskService {
     return {
       locationId: location.id,
       now: {
-        probabilityPct: location.riskScore,
+        probabilityPct: baseScore,
         riskLevel: baseLevel,
         trend: location.riskTrend
       },

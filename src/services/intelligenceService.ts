@@ -27,6 +27,11 @@ import {
   getBackendShelters,
   getBackendTerrain
 } from './backendAdapters';
+import {
+  normalizeRiskLevel,
+  normalizeSoilMoisturePct,
+  normalizeProbabilityPct
+} from '../utils/dataNormalization';
 
 interface BackendReport {
   id: number;
@@ -82,7 +87,11 @@ class IntelligenceService {
       nearbyInfrastructure: [],
       vulnerablePopulationEst: 0,
       lastUpdated: 'PROJECT API',
-      dataProvenance: 'AI PREDICTION'
+      dataProvenance: 'AI PREDICTION',
+      telemetryAvailable: false,
+      environmentalDataAvailable: false,
+      terrainDataAvailable: false,
+      riskDataAvailable: false
     };
   }
 
@@ -153,34 +162,60 @@ class IntelligenceService {
           const env = environment.data?.[0] || {};
           const terr = terrain.data?.[0] || {};
           const backendRisk = risk.risk || {};
-          const riskScore = this.finite(backendRisk.risk_score, this.finite(backendRisk.risk_probability, mapped.riskScore / 100) * 100);
-          const riskLevel = String(backendRisk.risk_level || mapped.riskLevel).toUpperCase();
+          const environmentalDataAvailable = environment.data?.length > 0;
+          const terrainDataAvailable = terrain.data?.length > 0;
+          const riskDataAvailable = Boolean(risk.risk);
+          const riskScore = this.finite(
+            backendRisk.risk_score,
+            normalizeProbabilityPct(backendRisk.risk_probability, baseLocation.riskScore)
+          );
+          const riskLevel = normalizeRiskLevel(backendRisk.risk_level, baseLocation.riskLevel);
           return {
             ...mapped,
             ...baseLocation,
-            rainfallCurrentMm: this.finite(env.rain_1h, mapped.rainfallCurrentMm),
-            rainfall24hMm: this.finite(env.rain_24h, mapped.rainfall24hMm),
-            rainfall72hMm: this.finite(env.rain_3d, mapped.rainfall72hMm),
-            rainfallDecayMemoryMm: this.finite(env.antecedent_rainfall_index, mapped.rainfallDecayMemoryMm),
-            soilMoisturePct: this.finite(env.soil_moisture, mapped.soilMoisturePct),
-            elevationM: this.finite(terr.elevation, mapped.elevationM),
-            slopeAngleDeg: this.finite(terr.slope, mapped.slopeAngleDeg),
+            rainfallCurrentMm: this.finite(env.rain_1h, baseLocation.rainfallCurrentMm),
+            rainfall24hMm: this.finite(env.rain_24h, baseLocation.rainfall24hMm),
+            rainfall72hMm: this.finite(env.rain_3d, baseLocation.rainfall72hMm),
+            rainfallDecayMemoryMm: this.finite(env.antecedent_rainfall_index, baseLocation.rainfallDecayMemoryMm),
+            soilMoisturePct: normalizeSoilMoisturePct(env.soil_moisture, baseLocation.soilMoisturePct),
+            elevationM: this.finite(terr.elevation, baseLocation.elevationM),
+            slopeAngleDeg: this.finite(terr.slope, baseLocation.slopeAngleDeg),
             riskScore,
-            riskProbability: this.finite(backendRisk.risk_probability, riskScore / 100),
-            riskLevel: ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'].includes(riskLevel) ? riskLevel as MonitoredLocation['riskLevel'] : mapped.riskLevel,
+            riskProbability: backendRisk.risk_probability == null
+              ? riskScore / 100
+              : this.finite(backendRisk.risk_probability, riskScore / 100),
+            riskLevel,
             riskConfidence: backendRisk.confidence ?? null,
             modelVersion: backendRisk.model_version || undefined,
             predictionWindow: backendRisk.prediction_window || undefined,
             riskTimestamp: backendRisk.timestamp || undefined,
-            dataProvenance: 'AI PREDICTION'
+            dataProvenance: 'AI PREDICTION' as const,
+            telemetryAvailable: environmentalDataAvailable || terrainDataAvailable || riskDataAvailable,
+            environmentalDataAvailable,
+            terrainDataAvailable,
+            riskDataAvailable
           };
         } catch (error) {
           if (!(error instanceof ApiError)) throw error;
-          return { ...baseLocation, dataProvenance: 'PROTOTYPE DATA' };
+          return {
+            ...baseLocation,
+            dataProvenance: 'PROTOTYPE DATA' as const,
+            telemetryAvailable: Boolean(prototypeMatch),
+            environmentalDataAvailable: Boolean(prototypeMatch),
+            terrainDataAvailable: Boolean(prototypeMatch),
+            riskDataAvailable: Boolean(prototypeMatch)
+          };
         }
       }));
       const mergedLocations = [
-        ...INITIAL_MONITORED_LOCATIONS.map((location) => ({ ...location, dataProvenance: 'PROTOTYPE DATA' as const })).filter((location) => !backendOverlays.some((backendLocation) =>
+        ...INITIAL_MONITORED_LOCATIONS.map((location) => ({
+          ...location,
+          dataProvenance: 'PROTOTYPE DATA' as const,
+          telemetryAvailable: true,
+          environmentalDataAvailable: true,
+          terrainDataAvailable: true,
+          riskDataAvailable: true
+        })).filter((location) => !backendOverlays.some((backendLocation) =>
           backendLocation.state === location.state &&
           backendLocation.district === location.district &&
           Math.abs(backendLocation.lat - location.lat) <= 0.02 &&
@@ -194,7 +229,14 @@ class IntelligenceService {
       );
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
-      let filtered = this.locations.map((location) => ({ ...location, dataProvenance: 'PROTOTYPE DATA' as const }));
+      let filtered = this.locations.map((location) => ({
+        ...location,
+        dataProvenance: 'PROTOTYPE DATA' as const,
+        telemetryAvailable: true,
+        environmentalDataAvailable: true,
+        terrainDataAvailable: true,
+        riskDataAvailable: true
+      }));
       if (state) filtered = filtered.filter((location) => location.state === state);
       if (district && district !== 'ALL') filtered = filtered.filter((location) => location.district.toLowerCase() === district.toLowerCase());
       return filtered;
@@ -319,7 +361,7 @@ class IntelligenceService {
       return alerts.map((alert: BackendAlert) => ({
         id: String(alert.id ?? alert.title ?? 'ALERT'),
         title: alert.title || 'Backend alert',
-        severity: ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'].includes(String(alert.severity).toUpperCase()) ? String(alert.severity).toUpperCase() as EmergencyBulletin['severity'] : 'MODERATE',
+        severity: normalizeRiskLevel(alert.severity, 'MODERATE'),
         targetState: 'Meghalaya',
         targetDistricts: [],
         issuedAt: alert.created_at || 'Not available',
