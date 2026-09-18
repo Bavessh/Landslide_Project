@@ -199,7 +199,7 @@ class IntelligenceService {
           if (!(error instanceof ApiError)) throw error;
           return {
             ...baseLocation,
-            dataProvenance: 'PROTOTYPE DATA',
+            dataProvenance: 'PROTOTYPE DATA' as const,
             telemetryAvailable: Boolean(prototypeMatch),
             environmentalDataAvailable: Boolean(prototypeMatch),
             terrainDataAvailable: Boolean(prototypeMatch),
