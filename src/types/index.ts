@@ -60,6 +60,10 @@ export interface MonitoredLocation {
   modelVersion?: string;
   predictionWindow?: string;
   riskTimestamp?: string;
+  telemetryAvailable?: boolean;
+  environmentalDataAvailable?: boolean;
+  terrainDataAvailable?: boolean;
+  riskDataAvailable?: boolean;
 }
 
 export interface RoadSegment {
