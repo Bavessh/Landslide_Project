@@ -112,10 +112,10 @@ export const MonitoredSlopesPage: React.FC<Props> = ({
                   <td className="px-3 py-2">{location.district}</td>
                   <td className="px-3 py-2">{location.state}</td>
                   <td className="px-3 py-2"><RiskBadge level={location.riskLevel} score={location.riskScore} size="sm" /></td>
-                  <td className="px-3 py-2 font-mono">{formatMetric(location.rainfall24hMm, ' mm')}</td>
-                  <td className="px-3 py-2 font-mono">{formatMetric(location.soilMoisturePct, '%')}</td>
-                  <td className="px-3 py-2 font-mono">{formatMetric(location.slopeAngleDeg, '°')}</td>
-                  <td className="px-3 py-2 font-mono">{formatMetric(location.elevationM, ' m', 0)}</td>
+                  <td className="px-3 py-2 font-mono">{location.environmentalDataAvailable === false ? 'Unavailable' : formatMetric(location.rainfall24hMm, ' mm')}</td>
+                  <td className="px-3 py-2 font-mono">{location.environmentalDataAvailable === false ? 'Unavailable' : formatMetric(location.soilMoisturePct, '%')}</td>
+                  <td className="px-3 py-2 font-mono">{location.terrainDataAvailable === false ? 'Unavailable' : formatMetric(location.slopeAngleDeg, '°')}</td>
+                  <td className="px-3 py-2 font-mono">{location.terrainDataAvailable === false ? 'Unavailable' : formatMetric(location.elevationM, ' m', 0)}</td>
                   <td className="px-3 py-2">{location.riskTrend || 'Unavailable'}</td>
                   <td className="px-3 py-2">{location.lastUpdated || 'Unavailable'}</td>
                   <td className="px-3 py-2"><DataTruthfulnessBadge provenance={location.dataProvenance} size="sm" /></td>
