@@ -189,7 +189,7 @@ class IntelligenceService {
             modelVersion: backendRisk.model_version || undefined,
             predictionWindow: backendRisk.prediction_window || undefined,
             riskTimestamp: backendRisk.timestamp || undefined,
-            dataProvenance: 'AI PREDICTION',
+            dataProvenance: 'AI PREDICTION' as const,
             telemetryAvailable: environmentalDataAvailable || terrainDataAvailable || riskDataAvailable,
             environmentalDataAvailable,
             terrainDataAvailable,
