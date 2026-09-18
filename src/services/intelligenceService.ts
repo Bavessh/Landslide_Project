@@ -167,19 +167,19 @@ class IntelligenceService {
           const riskDataAvailable = Boolean(risk.risk);
           const riskScore = this.finite(
             backendRisk.risk_score,
-            normalizeProbabilityPct(backendRisk.risk_probability, mapped.riskScore)
+            normalizeProbabilityPct(backendRisk.risk_probability, baseLocation.riskScore)
           );
-          const riskLevel = normalizeRiskLevel(backendRisk.risk_level, mapped.riskLevel);
+          const riskLevel = normalizeRiskLevel(backendRisk.risk_level, baseLocation.riskLevel);
           return {
             ...mapped,
             ...baseLocation,
-            rainfallCurrentMm: this.finite(env.rain_1h, mapped.rainfallCurrentMm),
-            rainfall24hMm: this.finite(env.rain_24h, mapped.rainfall24hMm),
-            rainfall72hMm: this.finite(env.rain_3d, mapped.rainfall72hMm),
-            rainfallDecayMemoryMm: this.finite(env.antecedent_rainfall_index, mapped.rainfallDecayMemoryMm),
-            soilMoisturePct: normalizeSoilMoisturePct(env.soil_moisture, mapped.soilMoisturePct),
-            elevationM: this.finite(terr.elevation, mapped.elevationM),
-            slopeAngleDeg: this.finite(terr.slope, mapped.slopeAngleDeg),
+            rainfallCurrentMm: this.finite(env.rain_1h, baseLocation.rainfallCurrentMm),
+            rainfall24hMm: this.finite(env.rain_24h, baseLocation.rainfall24hMm),
+            rainfall72hMm: this.finite(env.rain_3d, baseLocation.rainfall72hMm),
+            rainfallDecayMemoryMm: this.finite(env.antecedent_rainfall_index, baseLocation.rainfallDecayMemoryMm),
+            soilMoisturePct: normalizeSoilMoisturePct(env.soil_moisture, baseLocation.soilMoisturePct),
+            elevationM: this.finite(terr.elevation, baseLocation.elevationM),
+            slopeAngleDeg: this.finite(terr.slope, baseLocation.slopeAngleDeg),
             riskScore,
             riskProbability: backendRisk.risk_probability == null
               ? riskScore / 100
